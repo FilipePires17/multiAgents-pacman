@@ -15,7 +15,8 @@
 from audioop import minmax
 from util import manhattanDistance
 from game import Directions
-import random, util
+import random
+import util
 import math
 
 from game import Agent
@@ -71,18 +72,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return val
         else:
             val = math.inf
-            ghostPositions = self.getGhostPositions()
+            ghostPositions = gameState.getGhostPositions()
             val2 = math.inf
             for pos in ghostPositions:
-                val2 = min(val2, manhattanDistance(pos, self.getPacmanPosition()))
+                val2 = min(val2, manhattanDistance(
+                    pos, gameState.getPacmanPosition()))
 
-            if val2 < 2: oi = 1
+            if val2 < 3:
+                oi = 1
             actions = gameState.getLegalActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = min(val, self.minimax(newState, depth-1, True))
+                if val2 < 3:
+                    val = min(val, gameState.getScore()-500)
+                else:
+                    val = min(val, self.minimax(newState, depth-1, True))
             return val
-
 
     def getAction(self, gameState):
         """
@@ -108,13 +113,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
 
-        self.minimax(gameState,self.depth)
+        self.minimax(gameState, self.depth)
 
         actions = gameState.getLegalPacmanActions()
         teste = []
         for action in actions:
             newState = gameState.generatePacmanSuccessor(action)
-            value = self.minimax(newState,self.depth)
+            value = self.minimax(newState, self.depth)
             teste.append(value)
         max_val = max(teste)
         ind = teste.index(max_val)
