@@ -12,9 +12,11 @@
 # Pieter Abbeel (pabbeel@cs.berkeley.edu).
 
 
+from audioop import minmax
 from util import manhattanDistance
 from game import Directions
 import random, util
+import math
 
 from game import Agent
 
@@ -56,6 +58,32 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
+    def minimax(self, gameState, depth, isMax=True):
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            return gameState.getScore()
+
+        if isMax:
+            val = -math.inf
+            actions = gameState.getLegalPacmanActions()
+            for action in actions:
+                newState = gameState.generatePacmanSuccessor(action)
+                val = max(val, self.minimax(newState, depth-1, False))
+            return val
+        else:
+            val = math.inf
+            ghostPositions = self.getGhostPositions()
+            val2 = math.inf
+            for pos in ghostPositions:
+                val2 = min(val2, manhattanDistance(pos, self.getPacmanPosition()))
+
+            if val2 < 2: oi = 1
+            actions = gameState.getLegalActions()
+            for action in actions:
+                newState = gameState.generatePacmanSuccessor(action)
+                val = min(val, self.minimax(newState, depth-1, True))
+            return val
+
+
     def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
@@ -79,8 +107,20 @@ class MinimaxAgent(MultiAgentSearchAgent):
         gameState.isLose():
         Returns whether or not the game state is a losing state
         """
-        actions = gameState.getLegalActions(0)
-        return actions[0]
+
+        self.minimax(gameState,self.depth)
+
+        actions = gameState.getLegalPacmanActions()
+        teste = []
+        for action in actions:
+            newState = gameState.generatePacmanSuccessor(action)
+            value = self.minimax(newState,self.depth)
+            teste.append(value)
+        max_val = max(teste)
+        ind = teste.index(max_val)
+
+        return actions[ind]
+        #esquerda, parado, direita, baixo, cima
         agents = gameState.getNumAgents()
         for agent in range(agents):
             print("oi")
