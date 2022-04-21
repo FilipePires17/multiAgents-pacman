@@ -62,7 +62,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
     def minimax(self, gameState, depth, isMax=True):
         if depth == 0 or gameState.isLose() or gameState.isWin():
-            return gameState.getScore()
+            return self.evaluationFunction(gameState)
 
         if isMax:
             val = -math.inf
@@ -82,7 +82,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
                 if val2 < 3:
-                    val = min(val, gameState.getScore() - 500)
+                    val = min(val, self.evaluationFunction(gameState) - 500)
                 else:
                     val = min(val, self.minimax(newState, depth - 1, True))
             return val
@@ -131,7 +131,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
 
     def alphabeta(self, gameState, depth, a, b, isMax=True):
         if depth == 0 or gameState.isLose() or gameState.isWin():
-            return gameState.getScore()
+            return self.evaluationFunction(gameState)
 
         if isMax:
             val = -math.inf
@@ -154,7 +154,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
                 if val2 < 3:
-                    val = min(val, gameState.getScore() - 500)
+                    val = min(val, self.evaluationFunction(gameState) - 500)
                 else:
                     val = min(val, self.alphabeta(newState, depth - 1, a, b, True))
             return val
