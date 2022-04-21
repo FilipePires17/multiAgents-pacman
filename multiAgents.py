@@ -68,25 +68,22 @@ class MinimaxAgent(MultiAgentSearchAgent):
             actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = max(val, self.minimax(newState, depth-1, False))
+                val = max(val, self.minimax(newState, depth - 1, False))
             return val
         else:
             val = math.inf
             ghostPositions = gameState.getGhostPositions()
             val2 = math.inf
             for pos in ghostPositions:
-                val2 = min(val2, manhattanDistance(
-                    pos, gameState.getPacmanPosition()))
+                val2 = min(val2, manhattanDistance(pos, gameState.getPacmanPosition()))
 
-            if val2 < 3:
-                oi = 1
             actions = gameState.getLegalActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
                 if val2 < 3:
-                    val = min(val, gameState.getScore()-500)
+                    val = min(val, gameState.getScore() - 500)
                 else:
-                    val = min(val, self.minimax(newState, depth-1, True))
+                    val = min(val, self.minimax(newState, depth - 1, True))
             return val
 
     def getAction(self, gameState):
@@ -113,8 +110,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
         Returns whether or not the game state is a losing state
         """
 
-        self.minimax(gameState, self.depth)
-
         actions = gameState.getLegalPacmanActions()
         teste = []
         for action in actions:
@@ -125,19 +120,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
         ind = teste.index(max_val)
 
         return actions[ind]
-        #esquerda, parado, direita, baixo, cima
-        agents = gameState.getNumAgents()
-        for agent in range(agents):
-            print("oi")
-            actions = gameState.getLegalActions(agent)
-            gameState = gameState.generateSuccessor(agent, actions[0])
-            print("tchau")
-        # actions = gameState.getLegalActions(0)
-        # newState = gameState.generateSuccessor(0, actions[0])
-        # actions = gameState.getLegalActions(0)
-        # newState = gameState.generateSuccessor(0, actions[0])
-        # input("")
-        return gameState
+        # esquerda, parado, direita, baixo, cima
 
 
 class AlphaBetaAgent(MultiAgentSearchAgent):
