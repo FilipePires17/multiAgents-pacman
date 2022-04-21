@@ -13,7 +13,6 @@
 
 
 from audioop import minmax
-from typing_extensions import Self
 from util import manhattanDistance
 from game import Actions, Directions
 import random
@@ -141,7 +140,8 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     """
     Your expectimax agent (question 4)
     """
-    def expectimax(gameState, depth, isMax = True):
+
+    def expectimax(self,gameState, depth, isMax = True):
 
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return gameState.getScore()
@@ -151,16 +151,16 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = Self.expectimax(newState, depth-1, False)
+                val = self.expectimax(newState, depth-1, False)
                 bestValue = max(bestValue, val)
             return bestValue
         else:
             value = 0
             actions = gameState.getLegalPacmanActions()
             for action in actions:
-                newState = gameState.generatePacmanSucessor(action)
-                p = action / actions
-                value = p * Self.expectimax(newState, depth-1, True)
+                newState = gameState.generatePacmanSuccessor(action)
+                p = 0.1
+                value = p * self.expectimax(newState, depth-1, True)
         return value
 
     def getAction(self, gameState):
