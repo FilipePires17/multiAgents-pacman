@@ -15,7 +15,7 @@
 from audioop import minmax
 from typing_extensions import Self
 from util import manhattanDistance
-from game import Directions
+from game import Actions, Directions
 import random
 import util
 import math
@@ -156,9 +156,10 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             return bestValue
         else:
             value = 0
+            actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSucessor(action)
-                p = probability(action)
+                p = action / actions
                 value = p * Self.expectimax(newState, depth-1, True)
         return value
 
