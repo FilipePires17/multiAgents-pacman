@@ -171,7 +171,16 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         legal moves.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = gameState.getLegalPacmanActions()
+        teste = []
+        for action in actions:
+            newState = gameState.generatePacmanSuccessor(action)
+            value = self.expectimax(newState, self.depth)
+            teste.append(value)
+        max_val = max(teste)
+        ind = teste.index(max_val)
+
+        return actions[ind]
      
 
 def betterEvaluationFunction(currentGameState):
