@@ -18,6 +18,7 @@ from game import Directions
 import random
 import util
 import math
+import numpy as np
 
 from game import Agent
 
@@ -128,12 +129,50 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
     """
 
+    def alphabeta(self, gameState, depth, a, b, isMax=True):
+        if depth == 0 or gameState.isLose() or gameState.isWin():
+            return gameState.getScore()
+
+        if isMax:
+            val = -math.inf
+            actions = gameState.getLegalPacmanActions()
+            for action in actions:
+                newState = gameState.generatePacmanSuccessor(action)
+                val = max(val, self.alphabeta(newState, depth - 1, a, b, False))
+                a = max(a, val)
+                if b <= a:
+                    break
+            return val
+        else:
+            val = math.inf
+            ghostPositions = gameState.getGhostPositions()
+            val2 = math.inf
+            for pos in ghostPositions:
+                val2 = min(val2, manhattanDistance(pos, gameState.getPacmanPosition()))
+
+            actions = gameState.getLegalActions()
+            for action in actions:
+                newState = gameState.generatePacmanSuccessor(action)
+                if val2 < 3:
+                    val = min(val, gameState.getScore() - 500)
+                else:
+                    val = min(val, self.alphabeta(newState, depth - 1, a, b, True))
+            return val
+
     def getAction(self, gameState):
         """
         Returns the minimax action using self.depth and self.evaluationFunction
         """
-        "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        actions = gameState.getLegalPacmanActions()
+        teste = []
+        for action in actions:
+            newState = gameState.generatePacmanSuccessor(action)
+            value = self.alphabeta(newState, self.depth, -math.inf, math.inf)
+            teste.append(value)
+        max_val = max(teste)
+        ind = teste.index(max_val)
+
+        return actions[ind]
 
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
