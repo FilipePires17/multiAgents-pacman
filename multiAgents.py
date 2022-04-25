@@ -141,7 +141,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
     Your expectimax agent (question 4)
     """
 
-    def expectimax(self,gameState, depth, isMax = True):
+    def expectimax(self, gameState, depth, isMax=True):
 
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return gameState.getScore()
@@ -151,17 +151,16 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
             actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = self.expectimax(newState, depth-1, False)
+                val = self.expectimax(newState, depth - 1, False)
                 bestValue = max(bestValue, val)
             return bestValue
         else:
             value = 0
-            actions = gameState.getLegalPacmanActions()
+            actions = gameState.getLegalActions(1)
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                p = 0.1
-                value = p * self.expectimax(newState, depth-1, True)
-        return value
+                value += self.expectimax(newState, depth - 1, True)
+            return value // len(actions)
 
     def getAction(self, gameState):
         """
@@ -181,7 +180,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         ind = teste.index(max_val)
 
         return actions[ind]
-     
+
 
 def betterEvaluationFunction(currentGameState):
     """
