@@ -73,9 +73,36 @@ class MinimaxAgent(MultiAgentSearchAgent):
             return val
         else:
             val = math.inf
-            ghostPositions = gameState.getGhostPositions()
-            val2 = math.inf
-            for pos in ghostPositions:
+            distanciasAntes = []
+            ghostPositionsAntes = gameState.getGhostPositions()
+            for pos in ghostPositionsAntes:
+                distanciasAntes.append(
+                    manhattanDistance(pos, gameState.getPacmanPosition())
+                )
+
+            acoesFantasma = ["" for i in range(len(ghostPositionsAntes))]
+            for i in range(len(ghostPositionsAntes)):
+                actions = gameState.getLegalActions(i + 1)
+                achou = False
+                for action in actions:
+                    newState = gameState.generateSuccessor(i + 1, action)
+                    posG = gameState.getGhostPosition(i + 1)
+                    distancia = manhattanDistance(posG, gameState.getPacmanPosition())
+                    if not achou:
+                        acoesFantasma[i] = action
+                    if distancia < distanciasAntes[i]:
+                        acoesFantasma[i] = action
+                        achou = True
+
+            newState = gameState.generateSuccessor(1, acoesFantasma[0])
+            for i in range(1, len(acoesFantasma)):
+                if newState.isLose():
+                    return self.evaluationFunction(newState)
+                newState = newState.generateSuccessor(i + 1, acoesFantasma[i])
+
+            val = self.minimax(newState, depth - 1, True)
+            # val2 = math.inf
+            """for pos in ghostPositions:
                 val2 = min(val2, manhattanDistance(pos, gameState.getPacmanPosition()))
 
             actions = gameState.getLegalActions()
@@ -84,7 +111,8 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 if val2 < 3:
                     val = min(val, self.evaluationFunction(gameState) - 500)
                 else:
-                    val = min(val, self.minimax(newState, depth - 1, True))
+                    val = min(val, self.minimax(newState, depth - 1, True))"""
+
             return val
 
     def getAction(self, gameState):
