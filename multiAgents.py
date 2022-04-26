@@ -96,6 +96,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
 
             newState = gameState.generateSuccessor(1, acoesFantasma[0])
             for i in range(1, len(acoesFantasma)):
+                print(self.evaluationFunction(newState))
                 if newState.isLose():
                     return self.evaluationFunction(newState)
                 newState = newState.generateSuccessor(i + 1, acoesFantasma[i])
