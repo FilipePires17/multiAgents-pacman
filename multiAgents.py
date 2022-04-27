@@ -60,19 +60,27 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
-    def minimax(self, gameState, depth, isMax=False):
+    def minimax(self, gameState, depth, agent=1):
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return self.evaluationFunction(gameState)
 
-        if isMax:
+        numAgents = gameState.getNumAgents()
+        if agent == 0:
             val = -math.inf
             actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = max(val, self.minimax(newState, depth - 1, False))
+                val = max(val, self.minimax(newState, depth - 1, 1))
             return val
         else:
             val = math.inf
+            actions = gameState.getLegalActions(agent)
+            newAgent = agent + 1 if agent + 1 < numAgents else 0
+            for action in actions:
+                newState = gameState.generateSuccessor(agent, action)
+                val = min(val, self.minimax(newState, depth - 1, newAgent))
+            return val
+
             distanciasAntes = []
             ghostPositionsAntes = gameState.getGhostPositions()
             for pos in ghostPositionsAntes:
@@ -133,12 +141,12 @@ class MinimaxAgent(MultiAgentSearchAgent):
             newState = gameState.generatePacmanSuccessor(action)
             value = self.minimax(newState, self.depth)
             teste.append(value)
-        #print(teste)
+        # print(teste)
         max_val = max(teste)
-        #print(max_val)
+        # print(max_val)
         ind = teste.index(max_val)
-        #print(actions)
-        #print(actions[ind])
+        # print(actions)
+        # print(actions[ind])
         return actions[ind]
         # esquerda, parado, direita, cima, baixo
 
@@ -148,52 +156,31 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
     """
 
-    def alphabeta(self, gameState, depth, a, b, isMax=False):
+    def alphabeta(self, gameState, depth, a, b, agent=1):
         if depth == 0 or gameState.isLose() or gameState.isWin():
             return self.evaluationFunction(gameState)
 
-        if isMax:
+        numAgents = gameState.getNumAgents()
+        if agent == 0:
             val = -math.inf
             actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = max(val, self.alphabeta(newState, depth - 1, a, b, False))
+                val = max(val, self.alphabeta(newState, depth - 1, a, b, 1))
                 a = max(a, val)
                 if b <= a:
                     break
             return val
         else:
             val = math.inf
-            distanciasAntes = []
-            ghostPositionsAntes = gameState.getGhostPositions()
-            for pos in ghostPositionsAntes:
-                distanciasAntes.append(
-                    manhattanDistance(pos, gameState.getPacmanPosition())
-                )
-            acoesFantasma = ["" for _ in range(len(ghostPositionsAntes))]
-            for i in range(len(ghostPositionsAntes)):
-                actions = gameState.getLegalActions(i + 1)
-                achou = False
-                for action in actions:
-                    newState = gameState.generateSuccessor(i + 1, action)
-                    posF = newState.getGhostPosition(i + 1)
-                    distancia = manhattanDistance(posF, newState.getPacmanPosition())
-                    if not achou:
-                        acoesFantasma[i] = action
-                    if distancia < distanciasAntes[i]:
-                        acoesFantasma[i] = action
-                        achou = True
-                        break
-
-            newState = gameState
-            for i in range(len(acoesFantasma)):
-                if newState.isLose():
-                    return self.evaluationFunction(newState)
-                newState = newState.generateSuccessor(i + 1, acoesFantasma[i])
-
-            val = self.alphabeta(newState, depth - 1, a, b, True)
-            b = min(val, a)
-
+            actions = gameState.getLegalActions(agent)
+            newAgent = agent + 1 if agent + 1 < numAgents else 0
+            for action in actions:
+                newState = gameState.generateSuccessor(agent, action)
+                val = min(val, self.alphabeta(newState, depth - 1, a, b, newAgent))
+                b = min(val, a)
+                if b < a:
+                    break
             return val
 
     def getAction(self, gameState):
