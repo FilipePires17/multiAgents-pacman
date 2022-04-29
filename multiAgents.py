@@ -13,6 +13,7 @@
 
 
 from audioop import minmax
+from typing import Tuple
 from util import manhattanDistance
 from game import Actions, Directions
 import random
@@ -83,36 +84,6 @@ class MinimaxAgent(MultiAgentSearchAgent):
                 )
             return val
 
-            distanciasAntes = []
-            ghostPositionsAntes = gameState.getGhostPositions()
-            for pos in ghostPositionsAntes:
-                distanciasAntes.append(
-                    manhattanDistance(pos, gameState.getPacmanPosition())
-                )
-            acoesFantasma = ["" for _ in range(len(ghostPositionsAntes))]
-            for i in range(len(ghostPositionsAntes)):
-                actions = gameState.getLegalActions(i + 1)
-                achou = False
-                for action in actions:
-                    newState = gameState.generateSuccessor(i + 1, action)
-                    posF = newState.getGhostPosition(i + 1)
-                    distancia = manhattanDistance(posF, newState.getPacmanPosition())
-                    if not achou:
-                        acoesFantasma[i] = action
-                    if distancia < distanciasAntes[i]:
-                        acoesFantasma[i] = action
-                        achou = True
-
-            newState = gameState
-            for i in range(len(acoesFantasma)):
-                if newState.isLose():
-                    return self.evaluationFunction(newState)
-                newState = newState.generateSuccessor(i + 1, acoesFantasma[i])
-
-            val = self.minimax(newState, depth - 1, True)
-
-            return val
-
     def getAction(self, gameState):
         """
         Returns the minimax action from the current gameState using self.depth
@@ -143,14 +114,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             newState = gameState.generatePacmanSuccessor(action)
             value = self.minimax(newState, self.depth, action)
             teste.append(value)
-        # print(teste)
         max_val = max(teste)
-        # print(max_val)
-        ind = teste.index(max_val)
-        # print(gameState.getFood().asList(), "\n -")
-        # print(actions)
-        # print(actions[ind])
-        return actions[ind]
+        index = teste.index(max_val)
+        return actions[index]
         # esquerda, parado, direita, cima, baixo
 
 
@@ -259,38 +225,47 @@ def betterEvaluationFunction(currentGameState, action):
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
 
-    DESCRIPTION: <write something here so we know what you did>
+    DESCRIPTION: Pega a distância entre o Pacman e a comida mais próxima dele,
+    então usa esse valor para subtrair da pontuação normal do jogo, desse
+    jeito nós fazemos o Pacman ser capaz de 'ver'todo o mapa, mais
+    especificamente ele sempre sabe onde tem uma comida para ir atrás. Também
+    adicionamos um reforço negativo por ficar parado, assim esperamos que o
+    Pacman fique mais dinâmico
     """
-    "*** YOUR CODE HERE ***"
 
     food = currentGameState.getFood().asList()
-    """
-    temFood = []
-    for i in range(len(food)):
-        for j in range(len(food[i])):
-            if food[i][j]:
-                temFood.append((i, j))"""
-
-    # print(temFood)
-
     val = math.inf
-    for foodPos in food:
-        dist = manhattanDistance(currentGameState.getPacmanPosition(), foodPos)
-        # print(dist)
-        val = min(val, dist)
+
+    foodPos = (0, 0)
+    pacmanPos = currentGameState.getPacmanPosition()
+    for _foodPos in food:
+        dist = manhattanDistance(pacmanPos, _foodPos)
+        if dist < val:
+            val = dist
+            foodPos = _foodPos
 
     if val == math.inf:
         val = 0
 
-    print(val)
-    score = currentGameState.getScore()
+    score = currentGameState.getScore() * 10
 
-    score -= val / 10
+    score -= val
 
-    # if currentGameState.getPacmanPosition()[0] != 10:
-    #    score -= posDiff
-    # if action == "Stop":
-    #    score -= 1
+    wall = (0, 0)
+    if foodPos[0] == pacmanPos[0]:
+        x = foodPos[0]
+        y = (foodPos[1] + pacmanPos[1]) // 2
+        wall = (x, y)
+    elif foodPos[1] == pacmanPos[1]:
+        y = foodPos[1]
+        x = (foodPos[0] + pacmanPos[0]) // 2
+        wall = (x, y)
+    # print(wall)
+    # if currentGameState.hasWall(wall[0], wall[1]) and val == 2:
+    #    score -= 5
+
+    if action == "Stop":
+        score -= 1
 
     return score
 
