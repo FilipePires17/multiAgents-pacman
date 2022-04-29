@@ -23,7 +23,7 @@ import numpy as np
 from game import Agent
 
 
-def scoreEvaluationFunction(currentGameState):
+def scoreEvaluationFunction(currentGameState, action):
     """
     This default evaluation function just returns the score of the state.
     The score is the same one displayed in the Pacman GUI.
@@ -31,7 +31,7 @@ def scoreEvaluationFunction(currentGameState):
     This evaluation function is meant for use with adversarial search agents
     (not reflex agents).
     """
-    return currentGameState.getScore()
+    return better(currentGameState, action)
 
 
 class MultiAgentSearchAgent(Agent):
@@ -60,9 +60,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
     Your minimax agent (question 2)
     """
 
-    def minimax(self, gameState, depth, agent=1):
+    def minimax(self, gameState, depth, currentAction, agent=1):
         if depth == 0 or gameState.isLose() or gameState.isWin():
-            return self.evaluationFunction(gameState)
+            return self.evaluationFunction(gameState, currentAction)
 
         numAgents = gameState.getNumAgents()
         if agent == 0:
@@ -70,7 +70,7 @@ class MinimaxAgent(MultiAgentSearchAgent):
             actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = max(val, self.minimax(newState, depth - 1, 1))
+                val = max(val, self.minimax(newState, depth - 1, currentAction, 1))
             return val
         else:
             val = math.inf
@@ -78,7 +78,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
             newAgent = agent + 1 if agent + 1 < numAgents else 0
             for action in actions:
                 newState = gameState.generateSuccessor(agent, action)
-                val = min(val, self.minimax(newState, depth - 1, newAgent))
+                val = min(
+                    val, self.minimax(newState, depth - 1, currentAction, newAgent)
+                )
             return val
 
             distanciasAntes = []
@@ -139,12 +141,13 @@ class MinimaxAgent(MultiAgentSearchAgent):
         teste = []
         for action in actions:
             newState = gameState.generatePacmanSuccessor(action)
-            value = self.minimax(newState, self.depth)
+            value = self.minimax(newState, self.depth, action)
             teste.append(value)
         # print(teste)
         max_val = max(teste)
         # print(max_val)
         ind = teste.index(max_val)
+        # print(gameState.getFood().asList(), "\n -")
         # print(actions)
         # print(actions[ind])
         return actions[ind]
@@ -156,9 +159,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
     Your minimax agent with alpha-beta pruning (question 3)
     """
 
-    def alphabeta(self, gameState, depth, a, b, agent=1):
+    def alphabeta(self, gameState, depth, a, b, currentAction, agent=1):
         if depth == 0 or gameState.isLose() or gameState.isWin():
-            return self.evaluationFunction(gameState)
+            return self.evaluationFunction(gameState, currentAction)
 
         numAgents = gameState.getNumAgents()
         if agent == 0:
@@ -166,7 +169,9 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             actions = gameState.getLegalPacmanActions()
             for action in actions:
                 newState = gameState.generatePacmanSuccessor(action)
-                val = max(val, self.alphabeta(newState, depth - 1, a, b, 1))
+                val = max(
+                    val, self.alphabeta(newState, depth - 1, a, b, currentAction, 1)
+                )
                 a = max(a, val)
                 if b <= a:
                     break
@@ -177,7 +182,10 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
             newAgent = agent + 1 if agent + 1 < numAgents else 0
             for action in actions:
                 newState = gameState.generateSuccessor(agent, action)
-                val = min(val, self.alphabeta(newState, depth - 1, a, b, newAgent))
+                val = min(
+                    val,
+                    self.alphabeta(newState, depth - 1, a, b, currentAction, newAgent),
+                )
                 b = min(val, a)
                 if b < a:
                     break
@@ -191,7 +199,7 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         teste = []
         for action in actions:
             newState = gameState.generatePacmanSuccessor(action)
-            value = self.alphabeta(newState, self.depth, -math.inf, math.inf)
+            value = self.alphabeta(newState, self.depth, -math.inf, math.inf, action)
             teste.append(value)
         max_val = max(teste)
         ind = teste.index(max_val)
@@ -246,7 +254,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
         return actions[ind]
 
 
-def betterEvaluationFunction(currentGameState):
+def betterEvaluationFunction(currentGameState, action):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
     evaluation function (question 5).
@@ -254,7 +262,37 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+
+    food = currentGameState.getFood().asList()
+    """
+    temFood = []
+    for i in range(len(food)):
+        for j in range(len(food[i])):
+            if food[i][j]:
+                temFood.append((i, j))"""
+
+    # print(temFood)
+
+    val = math.inf
+    for foodPos in food:
+        dist = manhattanDistance(currentGameState.getPacmanPosition(), foodPos)
+        # print(dist)
+        val = min(val, dist)
+
+    if val == math.inf:
+        val = 0
+
+    print(val)
+    score = currentGameState.getScore()
+
+    score -= val / 10
+
+    # if currentGameState.getPacmanPosition()[0] != 10:
+    #    score -= posDiff
+    # if action == "Stop":
+    #    score -= 1
+
+    return score
 
 
 # Abbreviation
